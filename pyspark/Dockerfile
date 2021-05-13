@@ -4,16 +4,8 @@ ARG NB_USER="sagemaker-user"
 ARG NB_UID="1000"
 ARG NB_GID="100"
 
-######################
-# OVERVIEW
-# 1. Creates the `sagemaker-user` user with UID/GID 1000/100.
-# 2. Ensures this user can `sudo` by default.
-# 3. Installs and configures Poetry, then installs the environment defined in pyproject.toml
-# 4. Configures the kernel (ipykernel should be installed on the parent image or defined in pyproject.toml)
-# 5. Make the default shell `bash`. This enhances the experience inside a Jupyter terminal as otherwise Jupyter defaults to `sh`
-######################
-
 # Setup the "sagemaker-user" user with root privileges.
+
 RUN \
     apt-get update && \
     apt-get install -y sudo && \
@@ -23,8 +15,8 @@ RUN \
     # Prevent apt-get cache from being persisted to this layer.
     rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install poetry
+# Install Python Packages
+RUN pip install poetry pyspark sagemaker_pyspark
 # Disable virtual environments (see notes in README.md)
 RUN poetry config virtualenvs.create false --local
 # Copy the environment definition file and install the environment
@@ -35,14 +27,12 @@ RUN poetry install
 RUN python -m ipykernel install --sys-prefix
 
 ####################
-# Fix DL4006
+## Spark Configuration ##
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 
 # Spark dependencies
-# Default values can be overridden at build time
-# (ARGS are in lower case to distinguish them from ENV)
 ARG spark_version="3.1.1"
 ARG hadoop_version="3.2"
 ARG spark_checksum="E90B31E58F6D95A42900BA4D288261D71F6C19FA39C1CB71862B792D1B5564941A320227F6AB0E09D946F16B8C1969ED2DEA2A369EC8F9D2D7099189234DE1BE"
@@ -66,7 +56,7 @@ RUN wget -q "https://archive.apache.org/dist/spark/spark-${APACHE_SPARK_VERSION}
 
 WORKDIR /usr/local
 
-# Configure Spark
+# Configure Spark Environment
 ENV SPARK_HOME=/usr/local/spark-3.1.1-bin-hadoop3.2
 ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:$PYTHONPATH
 ENV PATH=$SPARK_HOME/bin:$SPARK_HOME/python:$PATH
@@ -80,14 +70,13 @@ RUN ln -s "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" spark && \
     mkdir -p /usr/local/bin/before-notebook.d && \
     ln -s "${SPARK_HOME}/sbin/spark-config.sh" /usr/local/bin/before-notebook.d/spark-config.sh
 
-# Fix Spark installation for Java 11 and Apache Arrow library
-# see: https://github.com/apache/spark/pull/27356, https://spark.apache.org/docs/latest/#downloading
+# Fix Spark installation for Java 11 and Apache Arrow libraryg
+
 RUN cp -p "$SPARK_HOME/conf/spark-defaults.conf.template" "$SPARK_HOME/conf/spark-defaults.conf" && \
     echo 'spark.driver.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> $SPARK_HOME/conf/spark-defaults.conf && \
     echo 'spark.executor.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> $SPARK_HOME/conf/spark-defaults.conf
 #######################
 
-# Make the default shell bash (vs "sh") for a better Jupyter terminal UX
 ENV SHELL=/bin/bash
 
 USER $NB_UID

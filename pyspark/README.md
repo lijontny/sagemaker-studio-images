@@ -9,7 +9,15 @@ REGION=<aws-region>
 ACCOUNT_ID=<account-id
 docker build -t ${Account_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:spark .
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${Account_ID}.dkr.ecr.${REGION}.amazonaws.com
-docker push ${Account_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:spark
+docker push ${Account_ID}.dkr.ecr.${REGION}.amazonaws.com/smstudio-custom:sparkv1
+```
+### Attach image to studio domain from ECR
+Configuration
+```shell
+Image name: spark
+Image display name: spark
+Kernel name: python3
+Kernel display name - optional: python3
 ```
 ### Note
 This is a sample project for running spark context locally. More optimisation required before production use 

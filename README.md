@@ -1,2 +1,2 @@
 # sagemaker-studio-images
-Custom kernel images for AWS Sagemaker Studio Notebook
+Custom kernel images for AWS sagemaker studio notebook
