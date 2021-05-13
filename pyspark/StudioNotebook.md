@@ -4,8 +4,8 @@ Run this from your notebook to set your spark context and local hostname (Just o
 ```shell
 import pyspark
 import os
-sc = pyspark.SparkContext()
 os.system('sudo -- sh -c "echo 127.0.0.1 $(hostname) >> /etc/hosts"')
+sc = pyspark.SparkContext()
 ```
 ### Sample Code
 ```shell
