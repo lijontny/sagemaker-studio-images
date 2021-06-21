@@ -27,7 +27,7 @@ spark = SparkSession.builder.config("spark.driver.extraClassPath", classpath).ap
 import boto3
 s3 = boto3.resource('s3')
 
-obj = s3.Object("sparktestaz12", "username.csv")
+obj = s3.Object("<bucket>", "<file>.csv")
 obj.get()['Body'].read().decode('utf-8')
 ```
 ####Hadoop s3a with IAM user credential
@@ -37,7 +37,7 @@ hadoopConf.set("fs.s3a.access.key", "xxxxxxxx")
 hadoopConf.set("fs.s3a.secret.key", "xxxxxxxx")
 hadoopConf.set("fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
 
-file_s3 = "s3a://<bucket>/<key>"
+file_s3 = "s3a://<bucket>/<file>.csv"
 df = spark.read.option("delimiter", ",").csv(file_s3)
 df.show ()
 ```
