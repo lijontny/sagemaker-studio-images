@@ -22,7 +22,7 @@ classpath = ":".join(sagemaker_pyspark.classpath_jars())
 spark = SparkSession.builder.config("spark.driver.extraClassPath", classpath).appName("Demo App").getOrCreate()
 ```
 ## Read Bucket key
-####boto3
+### boto3
 ```shell
 import boto3
 s3 = boto3.resource('s3')
@@ -30,7 +30,7 @@ s3 = boto3.resource('s3')
 obj = s3.Object("<bucket>", "<file>.csv")
 obj.get()['Body'].read().decode('utf-8')
 ```
-####Hadoop s3a with IAM user credential
+### Hadoop s3a with IAM user credential
 ```shell
 hadoopConf = sc._jsc.hadoopConfiguration()
 hadoopConf.set("fs.s3a.access.key", "xxxxxxxx")
@@ -41,7 +41,7 @@ file_s3 = "s3a://<bucket>/<file>.csv"
 df = spark.read.option("delimiter", ",").csv(file_s3)
 df.show ()
 ```
-####Hadoop s3a with IAM role
+### Hadoop s3a with IAM role
 ```shell
 hadoopConf = sc._jsc.hadoopConfiguration()
 hadoopConf.set("fs.s3a.aws.credentials.provider", "com.amazonaws.auth.DefaultAWSCredentialsProviderChain")
